@@ -4,7 +4,11 @@ import '../home_page/home_page.dart';
 import 'package:firebase_database/firebase_database.dart';
 
 class AddTodoPage extends StatefulWidget {
-  const AddTodoPage({Key? key}) : super(key: key);
+  final Function(List<Select>) updateSelectedList;
+  AddTodoPage({
+    Key? key,
+    required this.updateSelectedList,
+  }) : super(key: key);
 
   @override
   State<AddTodoPage> createState() => _AddTodoPageState();
@@ -157,20 +161,19 @@ class _AddTodoPageState extends State<AddTodoPage> {
 
   Widget button() {
     return InkWell(
-      onTap: () {
+      onTap: () async {
         final id = DateTime.now().microsecondsSinceEpoch.toString();
         final ref = FirebaseDatabase.instance.ref('todo');
-        ref
-            .child(id)
-            .set({
-              'id': id,
-              'title': titlecontroller.text.toString(),
-              'task': type,
-              'description': descriptioncontroller.text.toString(),
-              'cetegory': Cetogory,
-            })
-            .then((value) => {Navigator.pop(context)})
-            .onError((error, stackTrace) => {print(error.toString())});
+        await ref.child(id).set({
+          'id': id,
+          'title': titlecontroller.text.toString(),
+          'task': type,
+          'description': descriptioncontroller.text.toString(),
+          'cetegory': Cetogory,
+        });
+        final newSelectItem = Select(id: id, checkvalue: false);
+        widget.updateSelectedList([newSelectItem]);
+        Navigator.pop(context);
       },
       child: Container(
           child: Center(

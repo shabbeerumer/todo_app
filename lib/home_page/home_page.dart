@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
@@ -26,25 +27,10 @@ class _homepageState extends State<homepage> {
   List<Select> Selected = [];
   var currentime = DateTime.now();
 
-  @override
-  void initState() {
-    // TODO: implement initState
-    super.initState();
-    deleteSelected();
-  }
-
-  void deleteSelected() {
-    final instance = FirebaseDatabase.instance.ref().child('todo');
-    for (int i = 0; i < Selected.length; i++) {
-      if (Selected[i].checkvalue == true) {
-        instance.child(Selected[i].id.toString()).remove().then((_) {
-          setState(() {
-            // Remove the item from the selected list
-            Selected.removeAt(i);
-          });
-        });
-      }
-    }
+  void updateSelectedList(List<Select> selected) {
+    setState(() {
+      Selected = selected;
+    });
   }
 
   Widget build(BuildContext context) {
@@ -90,15 +76,32 @@ class _homepageState extends State<homepage> {
                     ),
                     Selected.isEmpty
                         ? Container()
-                        : IconButton(
-                            onPressed: () {
-                              deleteSelected();
-                            },
-                            icon: Icon(
-                              Icons.delete,
-                              color: Colors.red,
-                              size: 28,
-                            )),
+                        : Selected.any((item) => item.checkvalue == true)
+                            ? IconButton(
+                                onPressed: () async {
+                                  final instance = FirebaseDatabase.instance
+                                      .ref()
+                                      .child('todo');
+                                  final toDelete =
+                                      Selected.where((item) => item.checkvalue)
+                                          .toList();
+                                  print(toDelete);
+                                  for (var item in toDelete) {
+                                    await instance.child(item.id).remove();
+                                    setState(() {
+                                      Selected.removeWhere(
+                                          (item) => toDelete.contains(item));
+                                      print('Removed item with id ${item.id}');
+                                    });
+                                  }
+                                },
+                                icon: Icon(
+                                  Icons.delete,
+                                  color: Colors.red,
+                                  size: 28,
+                                ),
+                              )
+                            : Container()
                   ],
                 ),
               ),
@@ -117,8 +120,14 @@ class _homepageState extends State<homepage> {
             label: '',
             icon: InkWell(
               onTap: () {
-                Navigator.push(context,
-                    MaterialPageRoute(builder: (context) => AddTodoPage()));
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => AddTodoPage(
+                              updateSelectedList: (List<Select> selectedList) {
+                                updateSelectedList(selectedList);
+                              },
+                            )));
               },
               child: Container(
                 height: 52,
@@ -213,6 +222,7 @@ class _homepageState extends State<homepage> {
 
   void onchange(int index) {
     setState(() {
+      print(Selected[index].id);
       Selected[index].checkvalue = !Selected[index].checkvalue;
     });
   }

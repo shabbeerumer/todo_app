@@ -27,7 +27,7 @@ class MyApp extends StatelessWidget {
     final user = auth.currentUser;
     return GetMaterialApp(
         debugShowCheckedModeBanner: false,
-        title: 'Flutter Demo',
+        title: 'todo app',
         theme: ThemeData(
           primarySwatch: Colors.blue,
         ),
