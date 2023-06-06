@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import '../home_page/home_page.dart';
 import 'package:firebase_database/firebase_database.dart';
 
 class Viewdata extends StatefulWidget {
@@ -23,6 +21,7 @@ class _ViewdataState extends State<Viewdata> {
   @override
   void initState() {
     super.initState();
+    print(widget.id);
     var title = widget.data['title'].toString();
     titlecontroller = TextEditingController(text: title);
     descriptioncontroller =
@@ -62,11 +61,13 @@ class _ViewdataState extends State<Viewdata> {
                     children: [
                       IconButton(
                           onPressed: () {
-                            final ref = FirebaseDatabase.instance.ref('todo');
+                            final ref =
+                                FirebaseDatabase.instance.ref().child('todo');
                             ref
-                                .child(widget.id)
+                                .child(widget.id.toString())
                                 .remove()
-                                .then((value) => {Navigator.pop(context)})
+                                .then((value) =>
+                                    {print(widget.id), Navigator.pop(context)})
                                 .onError((error, stackTrace) =>
                                     {print(error.toString())});
                           },

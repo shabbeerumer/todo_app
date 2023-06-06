@@ -1,13 +1,10 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
-import '../home_page/home_page.dart';
 import 'package:firebase_database/firebase_database.dart';
 
 class AddTodoPage extends StatefulWidget {
-  final Function(List<Select>) updateSelectedList;
   AddTodoPage({
     Key? key,
-    required this.updateSelectedList,
   }) : super(key: key);
 
   @override
@@ -20,6 +17,14 @@ class _AddTodoPageState extends State<AddTodoPage> {
   final descriptioncontroller = TextEditingController();
   String type = '';
   String Cetogory = '';
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    titlecontroller.dispose();
+    descriptioncontroller.dispose();
+  }
 
   Widget build(BuildContext context) {
     return Scaffold(
@@ -36,40 +41,19 @@ class _AddTodoPageState extends State<AddTodoPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               SizedBox(height: 30),
-              IconButton(
-                  onPressed: () {
-                    InkWell(
-                      onTap: () {
-                        Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                                builder: (context) => homepage()));
-                      },
-                      child: Container(
-                        height: 52,
-                        width: 52,
-                        decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            gradient: LinearGradient(
-                                colors: [Colors.indigoAccent, Colors.purple])),
-                        child: Icon(
-                          Icons.add,
-                          size: 32,
-                          color: Colors.white,
-                        ),
-                      ),
-                    );
+              Padding(
+                padding: const EdgeInsets.only(left: 15),
+                child: InkWell(
+                  onTap: () {
+                    Navigator.pop(context);
                   },
-                  icon: InkWell(
-                    onTap: () {
-                      Navigator.pop(context);
-                    },
-                    child: Icon(
-                      Icons.arrow_back,
-                      color: Colors.white,
-                      size: 28,
-                    ),
-                  )),
+                  child: Icon(
+                    Icons.arrow_back,
+                    color: Colors.white,
+                    size: 28,
+                  ),
+                ),
+              ),
               Padding(
                 padding:
                     const EdgeInsets.symmetric(horizontal: 25, vertical: 5),
@@ -162,17 +146,18 @@ class _AddTodoPageState extends State<AddTodoPage> {
   Widget button() {
     return InkWell(
       onTap: () async {
-        final id = DateTime.now().microsecondsSinceEpoch.toString();
+        final uid = FirebaseAuth.instance.currentUser!.uid;
         final ref = FirebaseDatabase.instance.ref('todo');
-        await ref.child(id).set({
-          'id': id,
+        final id = DateTime.now().microsecondsSinceEpoch.toString();
+
+        await ref.child(id + uid).set({
           'title': titlecontroller.text.toString(),
           'task': type,
           'description': descriptioncontroller.text.toString(),
           'cetegory': Cetogory,
+          'Uid': uid,
+          'id': id
         });
-        final newSelectItem = Select(id: id, checkvalue: false);
-        widget.updateSelectedList([newSelectItem]);
         Navigator.pop(context);
       },
       child: Container(

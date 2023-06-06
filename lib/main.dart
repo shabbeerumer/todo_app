@@ -3,9 +3,6 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:todo_app/signin%20and%20login%20pages/signin.dart';
-import 'AddTodo/AddTodo.dart';
-import 'TodoCard/TodoCard.dart';
-import 'code_tasting_page.dart';
 import 'firebase_options.dart';
 import 'home_page/home_page.dart';
 

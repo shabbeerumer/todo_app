@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -18,6 +19,7 @@ class _Signin_scrrenState extends State<Signin_scrren> {
   final Emailcontroller = TextEditingController();
   final Passwordcontroller = TextEditingController();
   final auth = FirebaseAuth.instance;
+  final databaseReference = FirebaseDatabase.instance.ref().child('users');
   bool loading = false;
   final FirebaseAuthentication firebaseAuth = FirebaseAuthentication();
 
@@ -123,13 +125,28 @@ class _Signin_scrrenState extends State<Signin_scrren> {
         setState(() {
           loading = true;
         });
+
         auth
             .createUserWithEmailAndPassword(
                 email: Emailcontroller.text.toString(),
                 password: Passwordcontroller.text.toString())
             .then((value) => {
-                  Navigator.push(context,
-                      MaterialPageRoute(builder: (context) => Login_screen())),
+                  databaseReference.child(value.user!.uid).set({
+                    'Email': value.user!.email.toString(),
+                    'Password': Passwordcontroller.text.toString(),
+                    'phonenumber': '',
+                    'googlesignin': '',
+                    'profileimageurl': '',
+                    'useruid': value.user!.uid,
+                  }).then((value) => {
+                        setState(() {
+                          loading = false;
+                        }),
+                        Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => Login_screen())),
+                      }),
                   setState(() {
                     loading = false;
                   })
